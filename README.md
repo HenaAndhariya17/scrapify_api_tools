@@ -1,11 +1,12 @@
 Scrapify ApiTools Library
+
 A Laravel package to handle external API requests, web scraping, and data exporting.
 
 📦 Installation
 
 This package can be installed via Composer.
-composer require scrapify-dev/api-tools
 
+composer require scrapify-dev/api-tools
 
 Service Provider
 
@@ -72,7 +73,9 @@ markdown: Converts the page's HTML to Markdown.
 screenshot: Captures a full-page screenshot and returns its URL.
 specific: Extracts specific data points like link, email, image, phone, metadata, and heading.
 html: Returns the raw HTML content of the page.
+
 DynamicExport
+
 This class is designed to handle dynamic data exports, particularly with the phpoffice/phpspreadsheet library. It structures data and headings for easy export.
 Usage
 The class is instantiated with arrays for rows and headings.
@@ -93,25 +96,34 @@ $export = new DynamicExport($rows, $headings);
 📊 Example: Exporting Data to Excel
 
 To export data to an Excel file, you can combine the DynamicExport class with the phpoffice/phpspreadsheet library.
+
 Note: The following example assumes you have phpoffice/phpspreadsheet installed and configured.
+
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
+
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+
 use Scrapify\ApiTools\Exports\DynamicExport;
 
 // Assuming $rows and $headings have been prepared
+
 $export = new DynamicExport($rows, $headings);
 
 $spreadsheet = new Spreadsheet();
+
 $sheet = $spreadsheet->getActiveSheet();
 
 // Set headings
+
 foreach ($export->getHeadings() as $col => $heading) {
     $columnLetter = Coordinate::stringFromColumnIndex($col + 1);
     $sheet->getCell($columnLetter . '1')->setValue($heading);
 }
 
 // Set rows
+
 foreach ($export->getRows() as $rowIndex => $row) {
     foreach ($row as $colIndex => $value) {
         $columnLetter = Coordinate::stringFromColumnIndex($colIndex + 1);
