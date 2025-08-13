@@ -1,141 +1,166 @@
-Scrapify ApiTools Library
+📦 Scrapify ApiTools
 
-A Laravel package to handle external API requests, web scraping, and data exporting.
+A Laravel package for **API requests**, **web scraping**, and **dynamic data exporting** using `PhpSpreadsheet`.
 
-📦 Installation
+---
 
-This package can be installed via Composer.
+## 📥 Installation
 
+Install via Composer:
+
+```bash
 composer require scrapify-dev/api-tools
+```
 
-Service Provider
+The service provider is auto-discovered by Laravel.
+If you need to register manually, add to `config/app.php`:
 
-The package's service provider will be automatically discovered by Laravel. If you need to register it manually, add the following to your config/app.php:
+```php
 'providers' => [
-    // ...
     Scrapify\ApiTools\ApiToolsServiceProvider::class,
 ],
+```
 
+---
 
-⚙️ Core Components
+## ⚙️ Requirements
 
-This library consists of several core classes designed for specific tasks.
+* **PHP:** `>=8.0`
+* **Laravel:** `^9.0` | `^10.0` | `^11.0` | `^12.0`
+* **Dependencies:**
 
-ApiService
+  * `phpoffice/phpspreadsheet:^4.5`
+  * `symfony/dom-crawler:^6.0`
+  * `league/html-to-markdown:^4.0`
+  * `illuminate/support` *(as per Laravel version)*
 
-This class is used for making robust calls to external APIs. It supports various HTTP methods and authentication types.
-Usage
-The callApi() method is the main entry point.
-$apiService = new Scrapify\ApiTools\ApiService();
+---
+
+## 📚 Features
+
+* **ApiService** → Make robust HTTP API calls with authentication & custom headers.
+* **ApiScrapeService** → Scrape HTML, Markdown, specific elements, or full-page screenshots.
+* **DynamicExport** → Export data dynamically to Excel or other formats.
+
+---
+
+## 1️⃣ ApiService
+
+Make HTTP requests to external APIs.
+
+### **Usage**
+
+```php
+use Scrapify\ApiTools\ApiService;
+
+$apiService = new ApiService();
 
 try {
     $response = $apiService->callApi(
-        'https://api.example.com/data',
-        'GET',
-        ['param1' => 'value1'],
-        'Bearer',
-        ['token' => 'your_auth_token'],
-        ['X-Custom-Header' => 'MyValue']
+        'https://api.example.com/data', // Endpoint
+        'GET',                          // Method
+        ['param1' => 'value1'],          // Payload
+        'Bearer',                        // Auth type
+        ['token' => 'your_auth_token'],  // Auth data
+        ['X-Custom-Header' => 'MyValue'] // Headers
     );
 
-    // Get the JSON response body
     $data = $response->json();
 } catch (\Exception $e) {
-    // Handle the API call error
     echo $e->getMessage();
 }
+```
 
+---
 
-ApiScrapeService
+## 2️⃣ ApiScrapeService
 
-This class provides a simple way to scrape a URL and extract specific data in different formats (Markdown, HTML, specific fields, or a screenshot).
-Usage
-The scrape() method is the main entry point. It requires a URL, an output type, and optional specific options.
-$scraper = new Scrapify\ApiTools\ApiScrapeService();
+Scrape websites & extract data.
 
-// Scrape links and emails from a page
+### **Supported output types**
+
+* `html` → Raw HTML
+* `markdown` → HTML to Markdown
+* `screenshot` → Full-page screenshot
+* `specific` → Extract specific data (links, emails, images, phones, metadata, headings)
+
+### **Usage**
+
+```php
+use Scrapify\ApiTools\ApiScrapeService;
+
+$scraper = new ApiScrapeService();
+
+// Extract links & emails
 $result = $scraper->scrape(
     'https://example.com',
     'specific',
     ['link', 'email']
 );
 
-// Get a screenshot of the page
+// Screenshot
 $screenshot = $scraper->scrape(
     'https://example.com',
     'screenshot'
 );
+```
 
+---
 
-Supported outputType values:
+## 3️⃣ DynamicExport
 
-markdown: Converts the page's HTML to Markdown.
-screenshot: Captures a full-page screenshot and returns its URL.
-specific: Extracts specific data points like link, email, image, phone, metadata, and heading.
-html: Returns the raw HTML content of the page.
+Prepare and export tabular data.
 
-DynamicExport
+### **Usage**
 
-This class is designed to handle dynamic data exports, particularly with the phpoffice/phpspreadsheet library. It structures data and headings for easy export.
-Usage
-The class is instantiated with arrays for rows and headings.
+```php
 use Scrapify\ApiTools\Exports\DynamicExport;
 
 $rows = [
     ['John Doe', 'john@example.com'],
     ['Jane Smith', 'jane@example.com'],
 ];
+
 $headings = ['Name', 'Email'];
 
 $export = new DynamicExport($rows, $headings);
 
-// You can now use $export->getHeadings() and $export->getRows()
-// with a library like PhpOffice\PhpSpreadsheet to create a file.
+// Get arrays
+$headingsArray = $export->getHeadings();
+$rowsArray = $export->getRows();
+```
 
+---
 
-📊 Example: Exporting Data to Excel
+## 📊 Example: Export to Excel
 
-To export data to an Excel file, you can combine the DynamicExport class with the phpoffice/phpspreadsheet library.
-
-Note: The following example assumes you have phpoffice/phpspreadsheet installed and configured.
-
+```php
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
-
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
-
 use Scrapify\ApiTools\Exports\DynamicExport;
 
-// Assuming $rows and $headings have been prepared
-
+// Prepare export
 $export = new DynamicExport($rows, $headings);
 
 $spreadsheet = new Spreadsheet();
-
 $sheet = $spreadsheet->getActiveSheet();
 
-// Set headings
-
+// Headings
 foreach ($export->getHeadings() as $col => $heading) {
-    $columnLetter = Coordinate::stringFromColumnIndex($col + 1);
-    $sheet->getCell($columnLetter . '1')->setValue($heading);
+    $colLetter = Coordinate::stringFromColumnIndex($col + 1);
+    $sheet->setCellValue($colLetter . '1', $heading);
 }
 
-// Set rows
-
+// Rows
 foreach ($export->getRows() as $rowIndex => $row) {
     foreach ($row as $colIndex => $value) {
-        $columnLetter = Coordinate::stringFromColumnIndex($colIndex + 1);
-        $sheet->getCell($columnLetter . ($rowIndex + 2))->setValue($value);
+        $colLetter = Coordinate::stringFromColumnIndex($colIndex + 1);
+        $sheet->setCellValue($colLetter . ($rowIndex + 2), $value);
     }
 }
 
+// Save file
 $writer = new Xlsx($spreadsheet);
-$filename = 'exported_data.xlsx';
-$tempFile = tempnam(sys_get_temp_dir(), $filename);
-$writer->save($tempFile);
-
-return response()->download($tempFile, $filename)->deleteFileAfterSend(true);
-
-
+$writer->save('exported_data.xlsx');
+```
