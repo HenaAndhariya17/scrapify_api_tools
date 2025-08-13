@@ -1,11 +1,14 @@
 Scrapify ApiTools Library
 A Laravel package to handle external API requests, web scraping, and data exporting.
+
 📦 Installation
+
 This package can be installed via Composer.
 composer require scrapify-dev/api-tools
 
 
 Service Provider
+
 The package's service provider will be automatically discovered by Laravel. If you need to register it manually, add the following to your config/app.php:
 'providers' => [
     // ...
@@ -14,8 +17,11 @@ The package's service provider will be automatically discovered by Laravel. If y
 
 
 ⚙️ Core Components
+
 This library consists of several core classes designed for specific tasks.
+
 ApiService
+
 This class is used for making robust calls to external APIs. It supports various HTTP methods and authentication types.
 Usage
 The callApi() method is the main entry point.
@@ -40,6 +46,7 @@ try {
 
 
 ApiScrapeService
+
 This class provides a simple way to scrape a URL and extract specific data in different formats (Markdown, HTML, specific fields, or a screenshot).
 Usage
 The scrape() method is the main entry point. It requires a URL, an output type, and optional specific options.
@@ -60,6 +67,7 @@ $screenshot = $scraper->scrape(
 
 
 Supported outputType values:
+
 markdown: Converts the page's HTML to Markdown.
 screenshot: Captures a full-page screenshot and returns its URL.
 specific: Extracts specific data points like link, email, image, phone, metadata, and heading.
@@ -83,6 +91,7 @@ $export = new DynamicExport($rows, $headings);
 
 
 📊 Example: Exporting Data to Excel
+
 To export data to an Excel file, you can combine the DynamicExport class with the phpoffice/phpspreadsheet library.
 Note: The following example assumes you have phpoffice/phpspreadsheet installed and configured.
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
